@@ -1,0 +1,8 @@
+{
+  "HelloGoPipelineStack:githubRepoName": "",
+  "HelloGoPipelineStack:githubConnectionArn": "",
+  "HelloGoAppStack:useHttps": false,
+  "HelloGoAppStack:domainName": "",
+  "HelloGoAppStack:hostedZoneId": "",
+  "HelloGoAppStack:certificateArn": ""
+}
