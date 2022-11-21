@@ -2,6 +2,8 @@
 
 This is a sample project for AWS CDK development with Go.  It takes an http-based service listening on port 8080 and deploys to AWS as an Application Load Balanced Fargate Service.
 
+![High Level Architecture](diagrams/HelloGoCDK-high-level-architecture.png)
+
 ## Prerequisites
 
 You’ll need the following:
@@ -44,7 +46,7 @@ The `cdk.context.json` allows you to customize the deploy using some parameters:
 
 Use the `HelloGoStack.ServiceServiceURL` for you next `curl` tests.
 
-## Using GitHub
+### Using GitHub
 
 1. Create a GitHub private repository and [create a CodeStar connection to GitHub](https://docs.aws.amazon.com/dtconsole/latest/userguide/connections-create-github.html).
 
@@ -64,7 +66,11 @@ git push github main
 cdk deploy
 ```
 
+![CDK Deploy](diagrams/HelloGoCDK-cdk-deploy.png)
+
 The `HelloAppCDKPipeline` will start executing after it is created.  This pipeline includes an [application stage](https://docs.aws.amazon.com/cdk/v2/guide/cdk_pipeline.html#cdk_pipeline_stages) which will create your Hello Go App stack when it runs the first time.  This might take 10 minutes to fully complete.
+
+![CDK Pipeline](diagrams/HelloGoCDK-pipeline.png)
 
 ### Using AWS CodeCommit
 
@@ -94,6 +100,8 @@ This will trigger another execution of `HelloAppCDKPipeline`, which should succe
 ## Destroy Resources
 
 When you're done with this demo app, be sure to destroy the resources it creates so you are not charged for what you're not using.  The Application Load Balanced Fargate Service creates a VPC with a NAT Gateway which costs ~$2 per day.  See [(ECS): VPC by default created with NAT #18720](https://github.com/aws/aws-cdk/issues/18720) for updates.
+
+![Application Load Balanced Fargate Service](diagrams/HelloGoCDK-alb-fargate-service.png)
 
 ### Destroy the resources created with CDK
 
