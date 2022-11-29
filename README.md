@@ -131,6 +131,15 @@ aws cloudformation delete-stack --stack-name HelloGoAppStage-HelloGoAppStack
 - [Build your Go image](https://docs.docker.com/language/golang/build-images/)
 - [AWS CDK Intro Workshop > Go Workshop](https://cdkworkshop.com/60-go.html)
 
+## Architectural Decisions
+
+This sample uses the CDK construct for an Amazon ECS [Application Load Balanced Fargate Service](https://pkg.go.dev/github.com/aws/aws-cdk-go/awscdk/v2/awsecspatterns#readme-application-load-balanced-services) with configuration to support high availability across multiple availability zones.  This results in some resources that are "always on" and incurring costs.  If the usage pattern of your architecture could benefit from scaling down to zero, consider [building Lambda functions with Go](https://docs.aws.amazon.com/lambda/latest/dg/lambda-golang.html) for a serverless solution.
+
+- From the [Amazon ECS Deployment types](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/deployment-types.html), this sample uses the integrated ECS rolling update instead of a Blue/Green deployment with AWS CodeDeploy.
+- The Application Load Balancer is configured for HTTP/1.1 as the [protocol version](https://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-target-groups.html#target-group-protocol-version), but HTTP/2 or gRPC are available options.
+- HTTPS is terminated on the Application Load Balancer using certificates from [AWS Certificate Manager](https://aws.amazon.com/certificate-manager/).  For end-to-end encryption, a certificate would need to be installed on the container and the Go code updated.
+- This simple Go app doesn’t connect to AWS services nor have the [AWS SDK for Go](https://aws.amazon.com/sdk-for-go/) installed.  To grant AWS IAM permissions to AWS services, update the [Amazon ECS task execution IAM role](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_execution_IAM_role.html).
+
 ## Security
 
 See [CONTRIBUTING](CONTRIBUTING.md#security-issue-notifications) for more information.
