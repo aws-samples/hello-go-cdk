@@ -1,8 +1,6 @@
 # Diagrams
 
-The `HelloGoCDK.drawio` file contains a tab for each diagram.  To export these to `png` files, look at the instructions tab of
-
-For each tab:
+The `HelloGoCDK.drawio` file contains a tab for each diagram.  To export these to `png` files, for each tab:
 
 1. Select all
 1. File - Export as PNG
