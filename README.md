@@ -11,13 +11,13 @@ You’ll need the following:
 - An AWS account. If you don't already have one, follow the [Setting Up Your AWS Environment](https://aws.amazon.com/getting-started/guides/setup-environment/) getting started guide for a quick overview.
 - The AWS Command Line Interface (AWS CLI) installed.  Visit [Set Up the AWS CLI](https://aws.amazon.com/getting-started/guides/setup-environment/module-three/) for instructions on installing and configuring.
 - The AWS Cloud Development Kit (AWS CDK) installed.  Visit [Get Started with AWS CDK](https://aws.amazon.com/getting-started/guides/setup-cdk/?pg=gs&sec=gtkaws) for step-by-step instructions.
-- The CDK installed. You can find instructions for installing the CDK [here](https://docs.aws.amazon.com/cdk/v2/guide/getting_started.html).
+- Go 1.19 installed  You can [download a binary release](https://go.dev/dl/) suitable for your system.
 - You can either use AWS CodeCommit as your git repository or create a GitHub repo along with an AWS CodeStar [GitHub connection](https://docs.aws.amazon.com/codepipeline/latest/userguide/connections-github.html). [Create a connection to GitHub](https://docs.aws.amazon.com/dtconsole/latest/userguide/connections-create-github.html) contains those instructions.
 - Optional for HTTPS: A domain with a Route 53 [public hosted zone](https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/AboutHZWorkingWith.html)
 
 ## Test HelloApp container
 
-You can start the local code by building and running a container.
+If you have docker installed, you can locally run the app by building and running a container.
 
 ```bash
 cd HelloApp
@@ -25,7 +25,7 @@ docker build -t my-hellogo-app .
 docker run -it --rm --name my-running-app -p 8080:8080 --user 1001 my-hellogo-app
 ```
 
-In another terminal window, test by running some `curl` commands and look for output `Hello, localtest!`
+In another terminal window, test by running a `curl` command and look for output `Hello, localtest!`
 
 ```bash
 curl -w "\n" http://localhost:8080/localtest
@@ -44,17 +44,14 @@ The `cdk.context.json` allows you to customize the deploy using some parameters:
 - `HelloGoAppStack:hostedZoneId` - Route53 hosted zone ID for domain name above (allows TLS certificate to be provided by ACM)
 - `HelloGoAppStack:certificateArn` optional TLS certificate imported into ACM
 
-Use the `HelloGoStack.ServiceServiceURL` for you next `curl` tests.
-
 ### Using GitHub
 
 1. Create a GitHub private repository and [create a CodeStar connection to GitHub](https://docs.aws.amazon.com/dtconsole/latest/userguide/connections-create-github.html).
 
-2. Push the code to your repo so the pipeline can find it later.
+2. Push the code to your repo so the pipeline can find it later, replacing `{Your GitHub Org}` below.  Note: if you didn't `git clone` to download the project, you may need to run `git init` before these commands.
 
 ```bash
-git init
-git remote add github git@github.com:yourorg/hello-go-cdk.git
+git remote add github git@github.com:{Your GitHub Org}/hello-go-cdk.git
 git add .
 git commit -m "initial commit"
 git push github main
@@ -74,7 +71,7 @@ The `HelloAppCDKPipeline` will start executing after it is created.  This pipeli
 
 ### Using AWS CodeCommit
 
-If you don't want to use a GitHub repository, you can use AWS CodeCommit as your git repository.
+If you don't want to use a GitHub repository, you can use AWS CodeCommit as your git repository.  Using [git-remote-codecommit](https://docs.aws.amazon.com/codecommit/latest/userguide/setting-up-git-remote-codecommit.html) is the recommended method for supporting connections made with federated access, identity providers, and temporary credentials.
 
 Initial deployment might take 4-5 minutes.
 
@@ -82,12 +79,12 @@ Initial deployment might take 4-5 minutes.
 cdk deploy
 ```
 
-Your `HelloAppCDKPipeline` will have failed on the `Source` stage since no source code has been checked in to AWS CodeCommit.
-In the snippet below, `pipeline` is used for.  *Note:* You may need to change `us-east-1` to match the region you deployed to.  Look for the `RepositoryCloneUrl` stack output value.
+Your `HelloAppCDKPipeline` will have failed on the `Source` stage since source code has yet to be checked in to AWS CodeCommit.
+In the snippet below, the `RepositoryURL` stack output value is exported to the `$REPO_URL` environment value.  Note: if you didn't `git clone` to download the project, you may need to run `git init` before these commands.
 
 ```bash
-git init
-git remote add pipeline codecommit::us-east-1://hellogocdk
+export REPO_URL=`aws cloudformation describe-stacks --stack-name HelloGoPipelineStack --query  "Stacks[0].Outputs[?OutputKey=='RepositoryURL'].OutputValue" --output text`
+git remote add pipeline $REPO_URL
 git add .
 git commit -m "initial commit"
 git push pipeline main
@@ -96,6 +93,15 @@ git push pipeline main
 This will trigger another execution of `HelloAppCDKPipeline`, which should succeed.
 
 *Note*: When changing values in `cdk.context.json`, you might see this issue -> https://github.com/aws/aws-cdk/issues/13759
+
+## Test HelloGoApp service
+
+In a terminal window, test the HelloGoApp service with the commands below and look for output `Hello, servicetest!`
+
+```bash
+export HELLO_GO_URL=`aws cloudformation describe-stacks --stack-name HelloGoAppStage-HelloGoAppStack --query  "Stacks[0].Outputs[?starts_with(OutputKey, 'FargateServiceServiceURL')].OutputValue" --output text`
+curl -w "\n" $HELLO_GO_URL/servicetest
+```
 
 ## Destroy Resources
 

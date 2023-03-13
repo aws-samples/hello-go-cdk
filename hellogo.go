@@ -51,13 +51,13 @@ func NewHelloGoPipelineStack(scope constructs.Construct, id string, props *Hello
 	} else {
 		// https://pkg.go.dev/github.com/aws/aws-cdk-go/awscdk/v2/awscodecommit#Repository
 		repo := awscodecommit.NewRepository(stack, jsii.String("Repository"), &awscodecommit.RepositoryProps{
-			RepositoryName: jsii.String("hellogocdk"),
-			Description:    jsii.String("Hello GO application and CDK stack"),
+			RepositoryName: jsii.String("hello-go-cdk"),
+			Description:    jsii.String("Hello Go application and CDK stack"),
 		})
 
-		awscdk.NewCfnOutput(stack, jsii.String("RepositoryCloneUrl"), &awscdk.CfnOutputProps{
+		awscdk.NewCfnOutput(stack, jsii.String("RepositoryURL"), &awscdk.CfnOutputProps{
 			Value:       repo.RepositoryCloneUrlGrc(),
-			Description: jsii.String("Repository Clone Url"),
+			Description: jsii.String("Repository URL"),
 		})
 
 		// https://pkg.go.dev/github.com/aws/aws-cdk-go/awscdk/pipelines#section-readme
@@ -66,8 +66,9 @@ func NewHelloGoPipelineStack(scope constructs.Construct, id string, props *Hello
 
 	buildCommands := jsii.Strings(
 		"npm install -g aws-cdk",
-		"goenv install 1.18.3",
-		"goenv local 1.18.3",
+		// "goenv install --list",
+		"goenv install 1.19.5",
+		"goenv local 1.19.5",
 		"go build",
 		"cdk synth",
 	)
